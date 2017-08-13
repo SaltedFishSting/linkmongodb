@@ -1,0 +1,14 @@
+gw:
+  addr:                  localhost    ##本门户对外IP
+  httpListenPort:        9233         ##本门户对外端口
+  dbaddr:               "103.25.23.89:60013"
+  dbname:               "dataAnalysis_new"
+  tablename:            "report_tab"
+  
+
+output:
+  prometheus:            true
+  pushGateway:           false
+  pushGatewayAddr:       "http://192.168.101.33:9091"
+  period:                180 ##秒
+

@@ -63,7 +63,7 @@ var (
 	node1h = prometheus.NewHistogramVec(prometheus.HistogramOpts{
 		Namespace: "relaydelay",
 		Subsystem: "Histogram",
-		Name:      "210.51.168.108|1",
+		Name:      "1",
 		Help:      "node1",
 		Buckets:   prometheus.LinearBuckets(10, 30, 3),
 	},
@@ -74,7 +74,7 @@ var (
 	node1s = prometheus.NewSummaryVec(prometheus.SummaryOpts{
 		Namespace:  "relaydelay",
 		Subsystem:  "Summary",
-		Name:       "210.51.168.108|1",
+		Name:       "1",
 		Help:       "node1",
 		Objectives: map[float64]float64{0: 0.05, 0.5: 0.03, 1: 0.01},
 	},
@@ -85,7 +85,7 @@ var (
 	node2h = prometheus.NewHistogramVec(prometheus.HistogramOpts{
 		Namespace: "relaydelay",
 		Subsystem: "Histogram",
-		Name:      "114.112.74.12|2",
+		Name:      "2",
 		Help:      "node2",
 		Buckets:   prometheus.LinearBuckets(10, 30, 3),
 	},
@@ -96,7 +96,7 @@ var (
 	node2s = prometheus.NewSummaryVec(prometheus.SummaryOpts{
 		Namespace:  "relaydelay",
 		Subsystem:  "Summary",
-		Name:       "114.112.74.12|2",
+		Name:       "2",
 		Help:       "node2",
 		Objectives: map[float64]float64{0: 0.05, 0.5: 0.03, 1: 0.01},
 	},
@@ -107,7 +107,7 @@ var (
 	node3h = prometheus.NewHistogramVec(prometheus.HistogramOpts{
 		Namespace: "relaydelay",
 		Subsystem: "Histogram",
-		Name:      "175.102.21.33|3",
+		Name:      "3",
 		Help:      "node3",
 		Buckets:   prometheus.LinearBuckets(10, 30, 3),
 	},
@@ -118,7 +118,7 @@ var (
 	node3s = prometheus.NewSummaryVec(prometheus.SummaryOpts{
 		Namespace:  "relaydelay",
 		Subsystem:  "Summary",
-		Name:       "175.102.21.33|3",
+		Name:       "3",
 		Help:       "node3",
 		Objectives: map[float64]float64{0: 0.05, 0.5: 0.03, 1: 0.01},
 	},
@@ -129,7 +129,7 @@ var (
 	node4h = prometheus.NewHistogramVec(prometheus.HistogramOpts{
 		Namespace: "relaydelay",
 		Subsystem: "Histogram",
-		Name:      "175.102.8.227|4",
+		Name:      "4",
 		Help:      "node4",
 		Buckets:   prometheus.LinearBuckets(10, 30, 3),
 	},
@@ -140,7 +140,7 @@ var (
 	node4s = prometheus.NewSummaryVec(prometheus.SummaryOpts{
 		Namespace:  "relaydelay",
 		Subsystem:  "Summary",
-		Name:       "175.102.8.227|4",
+		Name:       "4",
 		Help:       "node4",
 		Objectives: map[float64]float64{0: 0.05, 0.5: 0.03, 1: 0.01},
 	},
@@ -151,7 +151,7 @@ var (
 	node5h = prometheus.NewHistogramVec(prometheus.HistogramOpts{
 		Namespace: "relaydelay",
 		Subsystem: "Histogram",
-		Name:      "122.13.78.226|5",
+		Name:      "5",
 		Help:      "node5",
 		Buckets:   prometheus.LinearBuckets(10, 30, 3),
 	},
@@ -162,7 +162,7 @@ var (
 	node5s = prometheus.NewSummaryVec(prometheus.SummaryOpts{
 		Namespace:  "relaydelay",
 		Subsystem:  "Summary",
-		Name:       "122.13.78.226|5",
+		Name:       "5",
 		Help:       "node5",
 		Objectives: map[float64]float64{0: 0.05, 0.5: 0.03, 1: 0.01},
 	},
@@ -173,7 +173,7 @@ var (
 	node6h = prometheus.NewHistogramVec(prometheus.HistogramOpts{
 		Namespace: "relaydelay",
 		Subsystem: "Histogram",
-		Name:      "125.88.254.159|6",
+		Name:      "6",
 		Help:      "node6",
 		Buckets:   prometheus.LinearBuckets(10, 30, 3),
 	},
@@ -184,7 +184,7 @@ var (
 	node6s = prometheus.NewSummaryVec(prometheus.SummaryOpts{
 		Namespace:  "relaydelay",
 		Subsystem:  "Summary",
-		Name:       "125.88.254.159|6",
+		Name:       "6",
 		Help:       "node6",
 		Objectives: map[float64]float64{0: 0.05, 0.5: 0.03, 1: 0.01},
 	},
@@ -195,7 +195,7 @@ var (
 	node7h = prometheus.NewHistogramVec(prometheus.HistogramOpts{
 		Namespace: "relaydelay",
 		Subsystem: "Histogram",
-		Name:      "125.211.202.28|7",
+		Name:      "7",
 		Help:      "node7",
 		Buckets:   prometheus.LinearBuckets(10, 30, 3),
 	},
@@ -206,7 +206,7 @@ var (
 	node7s = prometheus.NewSummaryVec(prometheus.SummaryOpts{
 		Namespace:  "relaydelay",
 		Subsystem:  "Summary",
-		Name:       "125.211.202.28|7",
+		Name:       "7",
 		Help:       "node7",
 		Objectives: map[float64]float64{0: 0.05, 0.5: 0.03, 1: 0.01},
 	},
@@ -217,7 +217,7 @@ var (
 	node8h = prometheus.NewHistogramVec(prometheus.HistogramOpts{
 		Namespace: "relaydelay",
 		Subsystem: "Histogram",
-		Name:      "222.171.242.142|8",
+		Name:      "8",
 		Help:      "node8",
 		Buckets:   prometheus.LinearBuckets(10, 30, 3),
 	},
@@ -228,7 +228,7 @@ var (
 	node8s = prometheus.NewSummaryVec(prometheus.SummaryOpts{
 		Namespace:  "relaydelay",
 		Subsystem:  "Summary",
-		Name:       "222.171.242.142|8",
+		Name:       "8",
 		Help:       "node8",
 		Objectives: map[float64]float64{0: 0.05, 0.5: 0.03, 1: 0.01},
 	},
@@ -239,7 +239,7 @@ var (
 	node9h = prometheus.NewHistogramVec(prometheus.HistogramOpts{
 		Namespace: "relaydelay",
 		Subsystem: "Histogram",
-		Name:      "123.138.91.24|9",
+		Name:      "9",
 		Help:      "node9",
 		Buckets:   prometheus.LinearBuckets(10, 30, 3),
 	},
@@ -250,7 +250,7 @@ var (
 	node9s = prometheus.NewSummaryVec(prometheus.SummaryOpts{
 		Namespace:  "relaydelay",
 		Subsystem:  "Summary",
-		Name:       "123.138.91.24|9",
+		Name:       "9",
 		Help:       "node9",
 		Objectives: map[float64]float64{0: 0.05, 0.5: 0.03, 1: 0.01},
 	},
@@ -261,7 +261,7 @@ var (
 	node10h = prometheus.NewHistogramVec(prometheus.HistogramOpts{
 		Namespace: "relaydelay",
 		Subsystem: "Histogram",
-		Name:      "124.116.176.115|10",
+		Name:      "10",
 		Help:      "node10",
 		Buckets:   prometheus.LinearBuckets(10, 30, 3),
 	},
@@ -272,7 +272,7 @@ var (
 	node10s = prometheus.NewSummaryVec(prometheus.SummaryOpts{
 		Namespace:  "relaydelay",
 		Subsystem:  "Summary",
-		Name:       "124.116.176.115|10",
+		Name:       "10",
 		Help:       "node10",
 		Objectives: map[float64]float64{0: 0.05, 0.5: 0.03, 1: 0.01},
 	},
@@ -283,7 +283,7 @@ var (
 	node11h = prometheus.NewHistogramVec(prometheus.HistogramOpts{
 		Namespace: "relaydelay",
 		Subsystem: "Histogram",
-		Name:      "221.7.112.74|11",
+		Name:      "11",
 		Help:      "node11",
 		Buckets:   prometheus.LinearBuckets(10, 30, 3),
 	},
@@ -294,7 +294,7 @@ var (
 	node11s = prometheus.NewSummaryVec(prometheus.SummaryOpts{
 		Namespace:  "relaydelay",
 		Subsystem:  "Summary",
-		Name:       "221.7.112.74|11",
+		Name:       "11",
 		Help:       "node11",
 		Objectives: map[float64]float64{0: 0.05, 0.5: 0.03, 1: 0.01},
 	},
@@ -305,7 +305,7 @@ var (
 	node13h = prometheus.NewHistogramVec(prometheus.HistogramOpts{
 		Namespace: "relaydelay",
 		Subsystem: "Histogram",
-		Name:      "220.249.119.217|13",
+		Name:      "13",
 		Help:      "node13",
 		Buckets:   prometheus.LinearBuckets(10, 30, 3),
 	},
@@ -316,7 +316,7 @@ var (
 	node13s = prometheus.NewSummaryVec(prometheus.SummaryOpts{
 		Namespace:  "relaydelay",
 		Subsystem:  "Summary",
-		Name:       "220.249.119.217|13",
+		Name:       "13",
 		Help:       "node13",
 		Objectives: map[float64]float64{0: 0.05, 0.5: 0.03, 1: 0.01},
 	},
@@ -327,7 +327,7 @@ var (
 	node14h = prometheus.NewHistogramVec(prometheus.HistogramOpts{
 		Namespace: "relaydelay",
 		Subsystem: "Histogram",
-		Name:      "61.183.245.140|14",
+		Name:      "id14",
 		Help:      "node14",
 		Buckets:   prometheus.LinearBuckets(10, 30, 3),
 	},
@@ -338,7 +338,7 @@ var (
 	node14s = prometheus.NewSummaryVec(prometheus.SummaryOpts{
 		Namespace:  "relaydelay",
 		Subsystem:  "Summary",
-		Name:       "61.183.245.140|14",
+		Name:       "id14",
 		Help:       "node14",
 		Objectives: map[float64]float64{0: 0.05, 0.5: 0.03, 1: 0.01},
 	},
@@ -349,7 +349,7 @@ var (
 	node19h = prometheus.NewHistogramVec(prometheus.HistogramOpts{
 		Namespace: "relaydelay",
 		Subsystem: "Histogram",
-		Name:      "103.25.23.121|19",
+		Name:      "19",
 		Help:      "node19",
 		Buckets:   prometheus.LinearBuckets(10, 30, 3),
 	},
@@ -360,7 +360,7 @@ var (
 	node19s = prometheus.NewSummaryVec(prometheus.SummaryOpts{
 		Namespace:  "relaydelay",
 		Subsystem:  "Summary",
-		Name:       "103.25.23.121|19",
+		Name:       "19",
 		Help:       "node19",
 		Objectives: map[float64]float64{0: 0.05, 0.5: 0.03, 1: 0.01},
 	},
@@ -371,7 +371,7 @@ var (
 	node20h = prometheus.NewHistogramVec(prometheus.HistogramOpts{
 		Namespace: "relaydelay",
 		Subsystem: "Histogram",
-		Name:      "103.25.23.122|20",
+		Name:      "20",
 		Help:      "node20",
 		Buckets:   prometheus.LinearBuckets(10, 30, 3),
 	},
@@ -382,7 +382,7 @@ var (
 	node20s = prometheus.NewSummaryVec(prometheus.SummaryOpts{
 		Namespace:  "relaydelay",
 		Subsystem:  "Summary",
-		Name:       "103.25.23.122|20",
+		Name:       "20",
 		Help:       "node20",
 		Objectives: map[float64]float64{0: 0.05, 0.5: 0.03, 1: 0.01},
 	},
@@ -393,7 +393,7 @@ var (
 	node21h = prometheus.NewHistogramVec(prometheus.HistogramOpts{
 		Namespace: "relaydelay",
 		Subsystem: "Histogram",
-		Name:      "223.111.205.86|21",
+		Name:      "21",
 		Help:      "node21",
 		Buckets:   prometheus.LinearBuckets(10, 30, 3),
 	},
@@ -404,7 +404,7 @@ var (
 	node21s = prometheus.NewSummaryVec(prometheus.SummaryOpts{
 		Namespace:  "relaydelay",
 		Subsystem:  "Summary",
-		Name:       "223.111.205.86|21",
+		Name:       "21",
 		Help:       "node21",
 		Objectives: map[float64]float64{0: 0.05, 0.5: 0.03, 1: 0.01},
 	},
@@ -415,7 +415,7 @@ var (
 	node23h = prometheus.NewHistogramVec(prometheus.HistogramOpts{
 		Namespace: "relaydelay",
 		Subsystem: "Histogram",
-		Name:      "223.111.205.90|23",
+		Name:      "23",
 		Help:      "node23",
 		Buckets:   prometheus.LinearBuckets(10, 30, 3),
 	},
@@ -426,7 +426,7 @@ var (
 	node23s = prometheus.NewSummaryVec(prometheus.SummaryOpts{
 		Namespace:  "relaydelay",
 		Subsystem:  "Summary",
-		Name:       "223.111.205.90|23",
+		Name:       "23",
 		Help:       "node23",
 		Objectives: map[float64]float64{0: 0.05, 0.5: 0.03, 1: 0.01},
 	},
@@ -480,9 +480,11 @@ func extract(ur map[float64]float64, ru map[float64]float64) error {
 	for _, id := range relayid {
 		if ur[id] != 0 {
 			Observe(id, ur[id])
+
 		}
 		if ru[id] != 0 {
-			Observe(id, ur[id])
+			Observe(id, ru[id])
+
 		}
 	}
 
@@ -528,14 +530,14 @@ func Observe(id float64, delay float64) {
 		node13s.WithLabelValues("220.249.119.217", "13").Observe(delay)
 		node13h.WithLabelValues("220.249.119.217", "13").Observe(delay)
 	case 14:
-		node1s.WithLabelValues("61.183.245.140", "14").Observe(delay)
-		node1h.WithLabelValues("61.183.245.140", "14").Observe(delay)
+		node14s.WithLabelValues("61.183.245.140", "14").Observe(delay)
+		node14h.WithLabelValues("61.183.245.140", "14").Observe(delay)
 	case 19:
-		node19s.WithLabelValues("103.25.23.121|19", "19").Observe(delay)
-		node19h.WithLabelValues("103.25.23.121|19", "19").Observe(delay)
+		node19s.WithLabelValues("103.25.23.121", "19").Observe(delay)
+		node19h.WithLabelValues("103.25.23.121", "19").Observe(delay)
 	case 20:
-		node20s.WithLabelValues("103.25.23.122|20", "20").Observe(delay)
-		node20h.WithLabelValues("103.25.23.122|20", "20").Observe(delay)
+		node20s.WithLabelValues("103.25.23.122", "20").Observe(delay)
+		node20h.WithLabelValues("103.25.23.122", "20").Observe(delay)
 	case 21:
 		node21s.WithLabelValues("223.111.205.86", "21").Observe(delay)
 		node21h.WithLabelValues("223.111.205.86", "21").Observe(delay)
@@ -549,8 +551,7 @@ func Observe(id float64, delay float64) {
 
 //从mongedb获取以解码的getpath明文数据数组
 func mongodbTogetpath(ip string, db string, table string) []string {
-	// 存放getpsth
-	var getpathString []string
+
 	looptime := int64(globeCfg.Output.Period) //minute
 	session, err := mgo.Dial(ip)
 	//session, err := mgo.Dial("127.0.0.1:27017")
@@ -565,13 +566,20 @@ func mongodbTogetpath(ip string, db string, table string) []string {
 	var min10time int64
 	min10time = nowtime - looptime*1000
 	var getpathresult []getpath
-	var result2 []getpath
+
 	//通过sid获取getpath日志
-	err = collection.Find(bson.M{"insertTime": bson.M{"$gt": min10time, "$elt": nowtime}}).Select(bson.M{"callGetpath": 1}).All(&getpathresult)
+	err = collection.Find(bson.M{"insertTime": bson.M{"$gt": min10time, "$lt": nowtime}}).Select(bson.M{"callGetpath": 1}).All(&getpathresult)
 	if err != nil {
 		panic(err)
 	}
 	i := 0
+	for _, v := range getpathresult {
+		if v.CallGetpath != "" {
+			i++
+		}
+	}
+	var result2 []getpath = make([]getpath, i)
+	i = 0
 	for _, v := range getpathresult {
 		if v.CallGetpath != "" {
 			result2[i] = v
@@ -579,6 +587,9 @@ func mongodbTogetpath(ip string, db string, table string) []string {
 		}
 	}
 	i = 0
+	// 存放未解码的getpsth
+	j := len(result2)
+	var getpathString []string = make([]string, j)
 	for _, result := range result2 {
 		getpathString[i] = getpathToString(result)
 		i++
@@ -608,31 +619,40 @@ func getpathToMap(str string) {
 	//解析ugzip json 获取relay延迟
 	var jsonmap map[string]interface{}
 	json.Unmarshal([]byte(str), &jsonmap)
+
 	if v, ok := jsonmap["ur_link_info"]; ok {
 		ur_link_info := v.(map[string]interface{})
 		if v, ok := ur_link_info["U_R_self"]; ok {
-			U_R_self := v.([]interface{})
-			for _, v := range U_R_self {
-				vmap := v.(map[string]interface{})
-				if v, ok := vmap["delay"]; ok {
-					delay = v.(float64)
-				}
-				if v, ok := vmap["relayID"]; ok {
-					urdelaymap[v.(float64)] = delay
+			if v != nil {
+
+				U_R_self := v.([]interface{})
+				for _, v := range U_R_self {
+					vmap := v.(map[string]interface{})
+					if v, ok := vmap["delay"]; ok {
+						delay = v.(float64)
+					}
+					if v, ok := vmap["relayID"]; ok {
+						urdelaymap[v.(float64)] = delay
+					}
 				}
 			}
+
 		}
 		if v, ok := ur_link_info["R_U_self"]; ok {
-			R_U_self := v.([]interface{})
-			for _, v := range R_U_self {
-				vmap := v.(map[string]interface{})
-				if v, ok := vmap["delay"]; ok {
-					delay = v.(float64)
-				}
-				if v, ok := vmap["relayID"]; ok {
-					rudelaymap[v.(float64)] = delay
+			if v != nil {
+				R_U_self := v.([]interface{})
+
+				for _, v := range R_U_self {
+					vmap := v.(map[string]interface{})
+					if v, ok := vmap["delay"]; ok {
+						delay = v.(float64)
+					}
+					if v, ok := vmap["relayID"]; ok {
+						rudelaymap[v.(float64)] = delay
+					}
 				}
 			}
+
 		}
 
 	}
@@ -650,15 +670,19 @@ func loadConfig() {
 		panic("invalid cfg.yaml")
 	}
 	globeCfg = &rfig
+	fmt.Println("Load config -'cfg.yaml'- ok...")
 }
 
 func main() {
 
+	loadConfig()                   //加载配置文件
 	ip := globeCfg.Gw.DBaddr       //"103.25.23.89:60013"
 	db := globeCfg.Gw.DBname       //"dataAnalysis_new"
 	table := globeCfg.Gw.Tablename //"report_tab"
 	//loop
 	go func() {
+		Must() //注册prometheus
+		fmt.Println("Program startup ok...")
 		//获取getpath明码数据
 		getpathstring := mongodbTogetpath(ip, db, table)
 		for _, v := range getpathstring {
@@ -678,6 +702,8 @@ func main() {
 		go func() {
 			http.Handle("/metrics", promhttp.Handler())
 			http.ListenAndServe(fmt.Sprintf("%s:%d", globeCfg.Gw.Addr, globeCfg.Gw.HttpListenPort), nil)
+			fmt.Println("ip", globeCfg.Gw.Addr)
+			fmt.Println("port", globeCfg.Gw.HttpListenPort)
 		}()
 	}
 	c := make(chan os.Signal, 1)
