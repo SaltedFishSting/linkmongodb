@@ -7,18 +7,41 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"io/ioutil"
+	"net/http"
+	"os"
+	"os/signal"
 	"strings"
 	"time"
 
 	"github.com/prometheus/client_golang/prometheus"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
+	"github.com/prometheus/client_golang/prometheus/push"
 	"gopkg.in/mgo.v2"
 	"gopkg.in/mgo.v2/bson"
+	"gopkg.in/yaml.v2"
 )
 
-//mongodb 数据mode
-type Person struct {
-	SidReporter string `bson:"sidReporter"`
+//配置文件yaml
+type RConfig struct {
+	Gw struct {
+		Addr           string `yaml:"addr"`
+		HttpListenPort int    `yaml:"httpListenPort"`
+		DBaddr         string `yaml:"dbaddr"`
+		DBname         string `yaml:"dbname"`
+		Tablename      string `yaml:"tablename"`
+	}
+	Output struct {
+		Prometheus      bool   `yaml:"prometheus"`
+		PushGateway     bool   `yaml:"pushGateway"`
+		PushGatewayAddr string `yaml:"pushGatewayAddr"`
+		Period          int    `yaml:"period"`
+	}
 }
+
+var globeCfg *RConfig
+
+//mongodb 数据mode
 type getpath struct {
 	CallGetpath string `bson:"callGetpath"`
 }
@@ -523,33 +546,44 @@ func Observe(id float64, delay float64) {
 		fmt.Errorf("line:383 undefined relayId")
 	}
 }
-func main() {
-	looptime := 10 //minute
-	session, err := mgo.Dial("103.25.23.89:60013")
+
+//从mongedb获取以解码的getpath明文数据数组
+func mongodbTogetpath(ip string, db string, table string) []string {
+	// 存放getpsth
+	var getpathString []string
+	looptime := int64(globeCfg.Output.Period) //minute
+	session, err := mgo.Dial(ip)
 	//session, err := mgo.Dial("127.0.0.1:27017")
 	if err != nil {
 		panic(err)
 	}
 	defer session.Close()
 
-	collection := session.DB("dataAnalysis_new").C("report_tab")
-	
-	nowtime: = time.Now().UnixNano() / 1000000
-	min10time:=nowtime-looptime*60*1000
-	getpathresult := []getpath{}
-	result2 := []getpath
+	collection := session.DB(db).C(table)
+	var nowtime int64
+	nowtime = time.Now().UnixNano() / 1000000
+	var min10time int64
+	min10time = nowtime - looptime*1000
+	var getpathresult []getpath
+	var result2 []getpath
 	//通过sid获取getpath日志
-	err = collection.Find(bson.M{"insertTime":{"$gt":min10time}},bson.M{"insertTime":{"$lt":nowtime}}).Select(bson.M{"callGetpath": 1}).All(&getpathresult)
+	err = collection.Find(bson.M{"insertTime": bson.M{"$gt": min10time, "$elt": nowtime}}).Select(bson.M{"callGetpath": 1}).All(&getpathresult)
 	if err != nil {
 		panic(err)
 	}
+	i := 0
 	for _, v := range getpathresult {
-		if v.CallGetpath == "" {
-		} else {
-			result2 = v
+		if v.CallGetpath != "" {
+			result2[i] = v
+			i++
 		}
 	}
-	getpathToString(result2)
+	i = 0
+	for _, result := range result2 {
+		getpathString[i] = getpathToString(result)
+		i++
+	}
+	return getpathString
 }
 
 // 将getpath中加密的数据变成明码
@@ -604,4 +638,52 @@ func getpathToMap(str string) {
 	}
 
 	extract(urdelaymap, rudelaymap)
+}
+func loadConfig() {
+	cfgbuf, err := ioutil.ReadFile("cfg.yaml")
+	if err != nil {
+		panic("not found cfg.yaml")
+	}
+	rfig := RConfig{}
+	err = yaml.Unmarshal(cfgbuf, &rfig)
+	if err != nil {
+		panic("invalid cfg.yaml")
+	}
+	globeCfg = &rfig
+}
+
+func main() {
+
+	ip := globeCfg.Gw.DBaddr       //"103.25.23.89:60013"
+	db := globeCfg.Gw.DBname       //"dataAnalysis_new"
+	table := globeCfg.Gw.Tablename //"report_tab"
+	//loop
+	go func() {
+		//获取getpath明码数据
+		getpathstring := mongodbTogetpath(ip, db, table)
+		for _, v := range getpathstring {
+			//获取延迟数据推送给prometheus
+			getpathToMap(v)
+		}
+		//是否推送数据给PushGatway
+		if globeCfg.Output.PushGateway {
+			if err := push.FromGatherer("relaydelay", push.HostnameGroupingKey(), globeCfg.Output.PushGatewayAddr, prometheus.DefaultGatherer); err != nil {
+				fmt.Println("FromGatherer:", err)
+			}
+		}
+		time.Sleep(time.Duration(globeCfg.Output.Period) * time.Second)
+	}()
+	//设置prometheus监听的ip和端口
+	if globeCfg.Output.Prometheus {
+		go func() {
+			http.Handle("/metrics", promhttp.Handler())
+			http.ListenAndServe(fmt.Sprintf("%s:%d", globeCfg.Gw.Addr, globeCfg.Gw.HttpListenPort), nil)
+		}()
+	}
+	c := make(chan os.Signal, 1)
+	signal.Notify(c)
+	signal.Notify(c, os.Interrupt, os.Kill)
+	s := <-c
+	fmt.Println("exit", s)
+
 }
