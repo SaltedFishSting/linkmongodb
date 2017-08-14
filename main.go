@@ -41,12 +41,9 @@ type RConfig struct {
 		Period          int    `yaml:"period"`
 	}
 	Relay struct {
-		Relaynode          string `yaml:"relaynode"`
-		Relaynodea         string `yaml:"relaynodea"`
-		Relaynodeb         string `yaml:"relaynodeb"`
-		Relaynodec         string `yaml:"relaynodec"`
-		HistogramOptsparam string `yaml:"histogramOptsparam"`
-		SummaryOptsparam   string `yaml:"summaryOptsparam"`
+		Relaynode          []string `yaml:"relaynode"`
+		HistogramOptsparam string   `yaml:"histogramOptsparam"`
+		SummaryOptsparam   string   `yaml:"summaryOptsparam"`
 	}
 }
 
@@ -263,12 +260,8 @@ func loadConfig() {
 }
 func init() {
 	loadConfig() //加载配置文件
-	re := []string{globeCfg.Relay.Relaynode, globeCfg.Relay.Relaynodea, globeCfg.Relay.Relaynodeb, globeCfg.Relay.Relaynodec}
-
-	relaynodeall := strings.Join(re, "")
-
-	relaynodes := strings.Split(relaynodeall, "|")
-
+	relaynodes := globeCfg.Relay.Relaynode
+	fmt.Println(relaynodes)
 	for _, v := range relaynodes {
 
 		relaynode := strings.Split(v, ":")
