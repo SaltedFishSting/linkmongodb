@@ -3,14 +3,17 @@ package main
 import (
 	"bytes"
 	"compress/gzip"
+	"container/list"
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"io"
 	"io/ioutil"
+
 	"net/http"
 	"os"
 	"os/signal"
+	"strconv"
 	"strings"
 	"time"
 
@@ -37,6 +40,14 @@ type RConfig struct {
 		PushGatewayAddr string `yaml:"pushGatewayAddr"`
 		Period          int    `yaml:"period"`
 	}
+	Relay struct {
+		Relaynode          string `yaml:"relaynode"`
+		Relaynodea         string `yaml:"relaynodea"`
+		Relaynodeb         string `yaml:"relaynodeb"`
+		Relaynodec         string `yaml:"relaynodec"`
+		HistogramOptsparam string `yaml:"histogramOptsparam"`
+		SummaryOptsparam   string `yaml:"summaryOptsparam"`
+	}
 }
 
 var globeCfg *RConfig
@@ -50,6 +61,16 @@ type itime struct {
 	InsertTime int64 `bson:"insertTime"`
 }
 
+//relay 节点数组
+//var relayid = []float64{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 13, 14, 19, 20, 21, 23}
+
+var relayidArray = list.New()
+var relayidMap = make(map[int64]string)
+var HistogramOptstart float64
+var HistogramOptwidth float64
+var HistogramOptcount int
+var SummaryOptsparamMap = make(map[float64]float64)
+
 //gzip解压
 func DoGzipUnCompress(compressSrc []byte) []byte {
 	b := bytes.NewReader(compressSrc)
@@ -59,429 +80,25 @@ func DoGzipUnCompress(compressSrc []byte) []byte {
 	return out.Bytes()
 }
 
-//relay 节点数组
-var relayid = [17]float64{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 13, 14, 19, 20, 21, 23}
-
 //prometheus var
 var (
-	node1h = prometheus.NewHistogramVec(prometheus.HistogramOpts{
-		Namespace: "relaydelay",
-		Subsystem: "Histogram",
-		Name:      "1",
-		Help:      "node1",
-		Buckets:   prometheus.LinearBuckets(10, 30, 3),
-	},
-		[]string{
-			"IP",
-			"RelayId",
-		})
-	node1s = prometheus.NewSummaryVec(prometheus.SummaryOpts{
-		Namespace:  "relaydelay",
-		Subsystem:  "Summary",
-		Name:       "1",
-		Help:       "node1",
-		Objectives: map[float64]float64{0: 0.05, 0.5: 0.03, 0.9: 0.01, 1: 0.01},
-	},
-		[]string{
-			"IP",
-			"RelayId",
-		})
-	node2h = prometheus.NewHistogramVec(prometheus.HistogramOpts{
-		Namespace: "relaydelay",
-		Subsystem: "Histogram",
-		Name:      "2",
-		Help:      "node2",
-		Buckets:   prometheus.LinearBuckets(10, 30, 3),
-	},
-		[]string{
-			"IP",
-			"RelayId",
-		})
-	node2s = prometheus.NewSummaryVec(prometheus.SummaryOpts{
-		Namespace:  "relaydelay",
-		Subsystem:  "Summary",
-		Name:       "2",
-		Help:       "node2",
-		Objectives: map[float64]float64{0: 0.05, 0.5: 0.03, 0.9: 0.01, 1: 0.01},
-	},
-		[]string{
-			"IP",
-			"RelayId",
-		})
-	node3h = prometheus.NewHistogramVec(prometheus.HistogramOpts{
-		Namespace: "relaydelay",
-		Subsystem: "Histogram",
-		Name:      "3",
-		Help:      "node3",
-		Buckets:   prometheus.LinearBuckets(10, 30, 3),
-	},
-		[]string{
-			"IP",
-			"RelayId",
-		})
-	node3s = prometheus.NewSummaryVec(prometheus.SummaryOpts{
-		Namespace:  "relaydelay",
-		Subsystem:  "Summary",
-		Name:       "3",
-		Help:       "node3",
-		Objectives: map[float64]float64{0: 0.05, 0.5: 0.03, 0.9: 0.01, 1: 0.01},
-	},
-		[]string{
-			"IP",
-			"RelayId",
-		})
-	node4h = prometheus.NewHistogramVec(prometheus.HistogramOpts{
-		Namespace: "relaydelay",
-		Subsystem: "Histogram",
-		Name:      "4",
-		Help:      "node4",
-		Buckets:   prometheus.LinearBuckets(10, 30, 3),
-	},
-		[]string{
-			"IP",
-			"RelayId",
-		})
-	node4s = prometheus.NewSummaryVec(prometheus.SummaryOpts{
-		Namespace:  "relaydelay",
-		Subsystem:  "Summary",
-		Name:       "4",
-		Help:       "node4",
-		Objectives: map[float64]float64{0: 0.05, 0.5: 0.03, 0.9: 0.01, 1: 0.01},
-	},
-		[]string{
-			"IP",
-			"RelayId",
-		})
-	node5h = prometheus.NewHistogramVec(prometheus.HistogramOpts{
-		Namespace: "relaydelay",
-		Subsystem: "Histogram",
-		Name:      "5",
-		Help:      "node5",
-		Buckets:   prometheus.LinearBuckets(10, 30, 3),
-	},
-		[]string{
-			"IP",
-			"RelayId",
-		})
-	node5s = prometheus.NewSummaryVec(prometheus.SummaryOpts{
-		Namespace:  "relaydelay",
-		Subsystem:  "Summary",
-		Name:       "5",
-		Help:       "node5",
-		Objectives: map[float64]float64{0: 0.05, 0.5: 0.03, 0.9: 0.01, 1: 0.01},
-	},
-		[]string{
-			"IP",
-			"RelayId",
-		})
-	node6h = prometheus.NewHistogramVec(prometheus.HistogramOpts{
-		Namespace: "relaydelay",
-		Subsystem: "Histogram",
-		Name:      "6",
-		Help:      "node6",
-		Buckets:   prometheus.LinearBuckets(10, 30, 3),
-	},
-		[]string{
-			"IP",
-			"RelayId",
-		})
-	node6s = prometheus.NewSummaryVec(prometheus.SummaryOpts{
-		Namespace:  "relaydelay",
-		Subsystem:  "Summary",
-		Name:       "6",
-		Help:       "node6",
-		Objectives: map[float64]float64{0: 0.05, 0.5: 0.03, 0.9: 0.01, 1: 0.01},
-	},
-		[]string{
-			"IP",
-			"RelayId",
-		})
-	node7h = prometheus.NewHistogramVec(prometheus.HistogramOpts{
-		Namespace: "relaydelay",
-		Subsystem: "Histogram",
-		Name:      "7",
-		Help:      "node7",
-		Buckets:   prometheus.LinearBuckets(10, 30, 3),
-	},
-		[]string{
-			"IP",
-			"RelayId",
-		})
-	node7s = prometheus.NewSummaryVec(prometheus.SummaryOpts{
-		Namespace:  "relaydelay",
-		Subsystem:  "Summary",
-		Name:       "7",
-		Help:       "node7",
-		Objectives: map[float64]float64{0: 0.05, 0.5: 0.03, 0.9: 0.01, 1: 0.01},
-	},
-		[]string{
-			"IP",
-			"RelayId",
-		})
-	node8h = prometheus.NewHistogramVec(prometheus.HistogramOpts{
-		Namespace: "relaydelay",
-		Subsystem: "Histogram",
-		Name:      "8",
-		Help:      "node8",
-		Buckets:   prometheus.LinearBuckets(10, 30, 3),
-	},
-		[]string{
-			"IP",
-			"RelayId",
-		})
-	node8s = prometheus.NewSummaryVec(prometheus.SummaryOpts{
-		Namespace:  "relaydelay",
-		Subsystem:  "Summary",
-		Name:       "8",
-		Help:       "node8",
-		Objectives: map[float64]float64{0: 0.05, 0.5: 0.03, 0.9: 0.01, 1: 0.01},
-	},
-		[]string{
-			"IP",
-			"RelayId",
-		})
-	node9h = prometheus.NewHistogramVec(prometheus.HistogramOpts{
-		Namespace: "relaydelay",
-		Subsystem: "Histogram",
-		Name:      "9",
-		Help:      "node9",
-		Buckets:   prometheus.LinearBuckets(10, 30, 3),
-	},
-		[]string{
-			"IP",
-			"RelayId",
-		})
-	node9s = prometheus.NewSummaryVec(prometheus.SummaryOpts{
-		Namespace:  "relaydelay",
-		Subsystem:  "Summary",
-		Name:       "9",
-		Help:       "node9",
-		Objectives: map[float64]float64{0: 0.05, 0.5: 0.03, 0.9: 0.01, 1: 0.01},
-	},
-		[]string{
-			"IP",
-			"RelayId",
-		})
-	node10h = prometheus.NewHistogramVec(prometheus.HistogramOpts{
-		Namespace: "relaydelay",
-		Subsystem: "Histogram",
-		Name:      "10",
-		Help:      "node10",
-		Buckets:   prometheus.LinearBuckets(10, 30, 3),
-	},
-		[]string{
-			"IP",
-			"RelayId",
-		})
-	node10s = prometheus.NewSummaryVec(prometheus.SummaryOpts{
-		Namespace:  "relaydelay",
-		Subsystem:  "Summary",
-		Name:       "10",
-		Help:       "node10",
-		Objectives: map[float64]float64{0: 0.05, 0.5: 0.03, 0.9: 0.01, 1: 0.01},
-	},
-		[]string{
-			"IP",
-			"RelayId",
-		})
-	node11h = prometheus.NewHistogramVec(prometheus.HistogramOpts{
-		Namespace: "relaydelay",
-		Subsystem: "Histogram",
-		Name:      "11",
-		Help:      "node11",
-		Buckets:   prometheus.LinearBuckets(10, 30, 3),
-	},
-		[]string{
-			"IP",
-			"RelayId",
-		})
-	node11s = prometheus.NewSummaryVec(prometheus.SummaryOpts{
-		Namespace:  "relaydelay",
-		Subsystem:  "Summary",
-		Name:       "11",
-		Help:       "node11",
-		Objectives: map[float64]float64{0: 0.05, 0.5: 0.03, 0.9: 0.01, 1: 0.01},
-	},
-		[]string{
-			"IP",
-			"RelayId",
-		})
-	node13h = prometheus.NewHistogramVec(prometheus.HistogramOpts{
-		Namespace: "relaydelay",
-		Subsystem: "Histogram",
-		Name:      "13",
-		Help:      "node13",
-		Buckets:   prometheus.LinearBuckets(10, 30, 3),
-	},
-		[]string{
-			"IP",
-			"RelayId",
-		})
-	node13s = prometheus.NewSummaryVec(prometheus.SummaryOpts{
-		Namespace:  "relaydelay",
-		Subsystem:  "Summary",
-		Name:       "13",
-		Help:       "node13",
-		Objectives: map[float64]float64{0: 0.05, 0.5: 0.03, 0.9: 0.01, 1: 0.01},
-	},
-		[]string{
-			"IP",
-			"RelayId",
-		})
-	node14h = prometheus.NewHistogramVec(prometheus.HistogramOpts{
-		Namespace: "relaydelay",
-		Subsystem: "Histogram",
-		Name:      "id14",
-		Help:      "node14",
-		Buckets:   prometheus.LinearBuckets(10, 30, 3),
-	},
-		[]string{
-			"IP",
-			"RelayId",
-		})
-	node14s = prometheus.NewSummaryVec(prometheus.SummaryOpts{
-		Namespace:  "relaydelay",
-		Subsystem:  "Summary",
-		Name:       "id14",
-		Help:       "node14",
-		Objectives: map[float64]float64{0: 0.05, 0.5: 0.03, 0.9: 0.01, 1: 0.01},
-	},
-		[]string{
-			"IP",
-			"RelayId",
-		})
-	node19h = prometheus.NewHistogramVec(prometheus.HistogramOpts{
-		Namespace: "relaydelay",
-		Subsystem: "Histogram",
-		Name:      "19",
-		Help:      "node19",
-		Buckets:   prometheus.LinearBuckets(10, 30, 3),
-	},
-		[]string{
-			"IP",
-			"RelayId",
-		})
-	node19s = prometheus.NewSummaryVec(prometheus.SummaryOpts{
-		Namespace:  "relaydelay",
-		Subsystem:  "Summary",
-		Name:       "19",
-		Help:       "node19",
-		Objectives: map[float64]float64{0: 0.05, 0.5: 0.03, 0.9: 0.01, 1: 0.01},
-	},
-		[]string{
-			"IP",
-			"RelayId",
-		})
-	node20h = prometheus.NewHistogramVec(prometheus.HistogramOpts{
-		Namespace: "relaydelay",
-		Subsystem: "Histogram",
-		Name:      "20",
-		Help:      "node20",
-		Buckets:   prometheus.LinearBuckets(10, 30, 3),
-	},
-		[]string{
-			"IP",
-			"RelayId",
-		})
-	node20s = prometheus.NewSummaryVec(prometheus.SummaryOpts{
-		Namespace:  "relaydelay",
-		Subsystem:  "Summary",
-		Name:       "20",
-		Help:       "node20",
-		Objectives: map[float64]float64{0: 0.05, 0.5: 0.03, 0.9: 0.01, 1: 0.01},
-	},
-		[]string{
-			"IP",
-			"RelayId",
-		})
-	node21h = prometheus.NewHistogramVec(prometheus.HistogramOpts{
-		Namespace: "relaydelay",
-		Subsystem: "Histogram",
-		Name:      "21",
-		Help:      "node21",
-		Buckets:   prometheus.LinearBuckets(10, 30, 3),
-	},
-		[]string{
-			"IP",
-			"RelayId",
-		})
-	node21s = prometheus.NewSummaryVec(prometheus.SummaryOpts{
-		Namespace:  "relaydelay",
-		Subsystem:  "Summary",
-		Name:       "21",
-		Help:       "node21",
-		Objectives: map[float64]float64{0: 0.05, 0.5: 0.03, 0.9: 0.01, 1: 0.01},
-	},
-		[]string{
-			"IP",
-			"RelayId",
-		})
-	node23h = prometheus.NewHistogramVec(prometheus.HistogramOpts{
-		Namespace: "relaydelay",
-		Subsystem: "Histogram",
-		Name:      "23",
-		Help:      "node23",
-		Buckets:   prometheus.LinearBuckets(10, 30, 3),
-	},
-		[]string{
-			"IP",
-			"RelayId",
-		})
-	node23s = prometheus.NewSummaryVec(prometheus.SummaryOpts{
-		Namespace:  "relaydelay",
-		Subsystem:  "Summary",
-		Name:       "23",
-		Help:       "node23",
-		Objectives: map[float64]float64{0: 0.05, 0.5: 0.03, 0.9: 0.01, 1: 0.01},
-	},
-		[]string{
-			"IP",
-			"RelayId",
-		})
+	nodeh *(prometheus.HistogramVec)
+	nodes *(prometheus.SummaryVec)
 )
 
 //prometheus 注册
 func Must() {
-	prometheus.MustRegister(node1h)
-	prometheus.MustRegister(node1s)
-	prometheus.MustRegister(node2h)
-	prometheus.MustRegister(node2s)
-	prometheus.MustRegister(node3h)
-	prometheus.MustRegister(node3s)
-	prometheus.MustRegister(node4h)
-	prometheus.MustRegister(node4s)
-	prometheus.MustRegister(node5h)
-	prometheus.MustRegister(node5s)
-	prometheus.MustRegister(node6h)
-	prometheus.MustRegister(node6s)
-	prometheus.MustRegister(node7h)
-	prometheus.MustRegister(node7s)
-	prometheus.MustRegister(node8h)
-	prometheus.MustRegister(node8s)
-	prometheus.MustRegister(node9h)
-	prometheus.MustRegister(node9s)
-	prometheus.MustRegister(node10h)
-	prometheus.MustRegister(node10s)
-	prometheus.MustRegister(node11h)
-	prometheus.MustRegister(node11s)
-	prometheus.MustRegister(node13h)
-	prometheus.MustRegister(node13s)
-	prometheus.MustRegister(node14h)
-	prometheus.MustRegister(node14s)
-	prometheus.MustRegister(node19h)
-	prometheus.MustRegister(node19s)
-	prometheus.MustRegister(node20h)
-	prometheus.MustRegister(node20s)
-	prometheus.MustRegister(node21h)
-	prometheus.MustRegister(node21s)
-	prometheus.MustRegister(node23h)
-	prometheus.MustRegister(node23s)
+	//	prometheus.MustRegister(nodeh)
+	//	prometheus.MustRegister(nodes)
 
 }
 
 //给prometheus推送数据
-func extract(ur map[float64]float64, ru map[float64]float64) error {
-	for _, id := range relayid {
+func extract(ur map[int64]int64, ru map[int64]int64) error {
+
+	for e := relayidArray.Front(); e != nil; e = e.Next() {
+
+		id := e.Value.(int64)
 		if ur[id] != 0 {
 			Observe(id, ur[id])
 
@@ -490,67 +107,19 @@ func extract(ur map[float64]float64, ru map[float64]float64) error {
 			Observe(id, ru[id])
 
 		}
+
 	}
 
 	return nil
 }
 
-func Observe(id float64, delay float64) {
-	switch id {
-	case 1:
-		node1s.WithLabelValues("210.51.168.108", "1").Observe(delay)
-		node1h.WithLabelValues("210.51.168.108", "1").Observe(delay)
-	case 2:
-		node2s.WithLabelValues("114.112.74.12", "2").Observe(delay)
-		node2h.WithLabelValues("114.112.74.12", "2").Observe(delay)
-	case 3:
-		node3s.WithLabelValues("175.102.21.33", "3").Observe(delay)
-		node3h.WithLabelValues("175.102.21.33", "3").Observe(delay)
-	case 4:
-		node4s.WithLabelValues("175.102.8.227", "4").Observe(delay)
-		node4h.WithLabelValues("175.102.8.227", "4").Observe(delay)
-	case 5:
-		node5s.WithLabelValues("122.13.78.226", "5").Observe(delay)
-		node5h.WithLabelValues("122.13.78.226", "5").Observe(delay)
-	case 6:
-		node6s.WithLabelValues("125.88.254.159", "6").Observe(delay)
-		node6h.WithLabelValues("125.88.254.159", "6").Observe(delay)
-	case 7:
-		node7s.WithLabelValues("125.211.202.28", "7").Observe(delay)
-		node7h.WithLabelValues("125.211.202.28", "7").Observe(delay)
-	case 8:
-		node8s.WithLabelValues("222.171.242.142", "8").Observe(delay)
-		node8h.WithLabelValues("222.171.242.142", "8").Observe(delay)
-	case 9:
-		node9s.WithLabelValues("123.138.91.24", "9").Observe(delay)
-		node9h.WithLabelValues("123.138.91.24", "9").Observe(delay)
-	case 10:
-		node10s.WithLabelValues("124.116.176.115", "10").Observe(delay)
-		node10h.WithLabelValues("124.116.176.115", "10").Observe(delay)
-	case 11:
-		node11s.WithLabelValues("221.7.112.74", "11").Observe(delay)
-		node11h.WithLabelValues("221.7.112.74", "11").Observe(delay)
-	case 13:
-		node13s.WithLabelValues("220.249.119.217", "13").Observe(delay)
-		node13h.WithLabelValues("220.249.119.217", "13").Observe(delay)
-	case 14:
-		node14s.WithLabelValues("61.183.245.140", "14").Observe(delay)
-		node14h.WithLabelValues("61.183.245.140", "14").Observe(delay)
-	case 19:
-		node19s.WithLabelValues("103.25.23.121", "19").Observe(delay)
-		node19h.WithLabelValues("103.25.23.121", "19").Observe(delay)
-	case 20:
-		node20s.WithLabelValues("103.25.23.122", "20").Observe(delay)
-		node20h.WithLabelValues("103.25.23.122", "20").Observe(delay)
-	case 21:
-		node21s.WithLabelValues("223.111.205.86", "21").Observe(delay)
-		node21h.WithLabelValues("223.111.205.86", "21").Observe(delay)
-	case 23:
-		node23s.WithLabelValues("223.111.205.90", "23").Observe(delay)
-		node23h.WithLabelValues("223.111.205.90", "23").Observe(delay)
-	default:
-		fmt.Errorf("line:383 undefined relayId")
-	}
+func Observe(id int64, delay int64) {
+	strid := strconv.FormatInt(id, 10)
+	strdelay := strconv.FormatInt(delay, 10)
+	fdelay, _ := strconv.ParseFloat(strdelay, 10)
+	nodeh.WithLabelValues(strid, relayidMap[id]).Observe(fdelay)
+	nodes.WithLabelValues(strid, relayidMap[id]).Observe(fdelay)
+
 }
 
 //从mongedb获取以解码的getpath明文数据数组
@@ -567,16 +136,18 @@ func mongodbTogetpath(ip string, db string, table string) []string {
 	collection := session.DB(db).C(table)
 	var nowtime itime
 	err = collection.Find(bson.M{}).Sort("-insertTime").Limit(1).Select(bson.M{"insertTime": 1}).One(&nowtime)
-	//nowtime = time.Now().UnixNano() / 1000000
+
 	var min10time int64
 	min10time = nowtime.InsertTime - looptime*1000
+
 	var getpathresult []getpath
 
 	//通过sid获取getpath日志
-	err = collection.Find(bson.M{"insertTime": bson.M{"$gt": min10time, "$lt": nowtime}}).Select(bson.M{"callGetpath": 1}).All(&getpathresult)
+	err = collection.Find(bson.M{"insertTime": bson.M{"$gt": min10time, "$lt": nowtime.InsertTime}}).Select(bson.M{"callGetpath": 1}).All(&getpathresult)
 	if err != nil {
 		panic(err)
 	}
+
 	i := 0
 	for _, v := range getpathresult {
 		if v.CallGetpath != "" {
@@ -592,6 +163,7 @@ func mongodbTogetpath(ip string, db string, table string) []string {
 			i++
 		}
 	}
+
 	i = 0
 	// 存放未解码的getpsth
 	j := len(result2)
@@ -600,6 +172,7 @@ func mongodbTogetpath(ip string, db string, table string) []string {
 		getpathString[i] = getpathToString(result)
 		i++
 	}
+
 	return getpathString
 }
 
@@ -619,31 +192,39 @@ func getpathToString(result2 getpath) string {
 // 解析解码后的getpath获取各relay节点延迟 并推送给prometheus
 func getpathToMap(str string) {
 	//存放delay
-	urdelaymap := make(map[float64]float64)
-	rudelaymap := make(map[float64]float64)
-	var delay float64
+	urdelaymap := make(map[int64]int64)
+	rudelaymap := make(map[int64]int64)
+	var delay int64
 	//解析ugzip json 获取relay延迟
 	var jsonmap map[string]interface{}
 	json.Unmarshal([]byte(str), &jsonmap)
 
 	if v, ok := jsonmap["ur_link_info"]; ok {
+
 		ur_link_info := v.(map[string]interface{})
+
 		if v, ok := ur_link_info["U_R_self"]; ok {
+
 			if v != nil {
 
 				U_R_self := v.([]interface{})
 				for _, v := range U_R_self {
+
 					vmap := v.(map[string]interface{})
 					if v, ok := vmap["delay"]; ok {
-						delay = v.(float64)
+						delay = int64(v.(float64))
+
 					}
+
 					if v, ok := vmap["relayID"]; ok {
-						urdelaymap[v.(float64)] = delay
+
+						urdelaymap[int64(v.(float64))] = delay
 					}
 				}
 			}
 
 		}
+
 		if v, ok := ur_link_info["R_U_self"]; ok {
 			if v != nil {
 				R_U_self := v.([]interface{})
@@ -651,10 +232,12 @@ func getpathToMap(str string) {
 				for _, v := range R_U_self {
 					vmap := v.(map[string]interface{})
 					if v, ok := vmap["delay"]; ok {
-						delay = v.(float64)
+
+						delay = int64(v.(float64))
 					}
 					if v, ok := vmap["relayID"]; ok {
-						rudelaymap[v.(float64)] = delay
+
+						rudelaymap[int64(v.(float64))] = delay
 					}
 				}
 			}
@@ -678,10 +261,68 @@ func loadConfig() {
 	globeCfg = &rfig
 	fmt.Println("Load config -'cfg.yaml'- ok...")
 }
+func init() {
+	loadConfig() //加载配置文件
+	re := []string{globeCfg.Relay.Relaynode, globeCfg.Relay.Relaynodea, globeCfg.Relay.Relaynodeb, globeCfg.Relay.Relaynodec}
 
+	relaynodeall := strings.Join(re, "")
+
+	relaynodes := strings.Split(relaynodeall, "|")
+
+	for _, v := range relaynodes {
+
+		relaynode := strings.Split(v, ":")
+		i64, _ := strconv.ParseInt(relaynode[1], 10, 64)
+		relayidArray.PushBack(i64)
+		relayidMap[i64] = relaynode[0]
+	}
+
+	HistogramOptsparam := strings.Split(globeCfg.Relay.HistogramOptsparam, "|")
+
+	HistogramOptstart, _ = strconv.ParseFloat(HistogramOptsparam[0], 64)
+
+	HistogramOptwidth, _ = strconv.ParseFloat(HistogramOptsparam[1], 64)
+
+	HistogramOptcount, _ = strconv.Atoi(HistogramOptsparam[2])
+
+	SummaryOptsparam := strings.Split(globeCfg.Relay.SummaryOptsparam, "|")
+
+	for _, v := range SummaryOptsparam {
+		param := strings.Split(v, ":")
+		key, _ := strconv.ParseFloat(param[0], 64)
+		value, _ := strconv.ParseFloat(param[1], 64)
+		SummaryOptsparamMap[key] = value
+	}
+	nodeh = prometheus.NewHistogramVec(prometheus.HistogramOpts{
+		Namespace: "relaydelay",
+		Subsystem: "Histogram",
+		Name:      "relay",
+		Help:      "nodeh",
+		Buckets:   prometheus.LinearBuckets(HistogramOptstart, HistogramOptwidth, HistogramOptcount),
+	},
+		[]string{
+			"IP",
+			"RelayId",
+		})
+
+	nodes = prometheus.NewSummaryVec(prometheus.SummaryOpts{
+		Namespace:  "relaydelay",
+		Subsystem:  "Summary",
+		Name:       "relay",
+		Help:       "nodes",
+		Objectives: SummaryOptsparamMap,
+	},
+		[]string{
+			"IP",
+			"RelayId",
+		})
+
+	prometheus.MustRegister(nodeh)
+	prometheus.MustRegister(nodes)
+
+}
 func main() {
 
-	loadConfig()                   //加载配置文件
 	ip := globeCfg.Gw.DBaddr       //"103.25.23.89:60013"
 	db := globeCfg.Gw.DBname       //"dataAnalysis_new"
 	table := globeCfg.Gw.Tablename //"report_tab"
@@ -691,10 +332,13 @@ func main() {
 		fmt.Println("Program startup ok...")
 		//获取getpath明码数据
 		for {
+
 			getpathstring := mongodbTogetpath(ip, db, table)
+
 			for _, v := range getpathstring {
 				//获取延迟数据推送给prometheus
 				getpathToMap(v)
+
 			}
 			//是否推送数据给PushGatway
 			if globeCfg.Output.PushGateway {
