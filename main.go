@@ -46,6 +46,10 @@ type getpath struct {
 	CallGetpath string `bson:"callGetpath"`
 }
 
+type itime struct {
+	InsertTime int64 `bson:"insertTime"`
+}
+
 //gzip解压
 func DoGzipUnCompress(compressSrc []byte) []byte {
 	b := bytes.NewReader(compressSrc)
@@ -76,7 +80,7 @@ var (
 		Subsystem:  "Summary",
 		Name:       "1",
 		Help:       "node1",
-		Objectives: map[float64]float64{0: 0.05, 0.5: 0.03, 1: 0.01},
+		Objectives: map[float64]float64{0: 0.05, 0.5: 0.03, 0.9: 0.01, 1: 0.01},
 	},
 		[]string{
 			"IP",
@@ -98,7 +102,7 @@ var (
 		Subsystem:  "Summary",
 		Name:       "2",
 		Help:       "node2",
-		Objectives: map[float64]float64{0: 0.05, 0.5: 0.03, 1: 0.01},
+		Objectives: map[float64]float64{0: 0.05, 0.5: 0.03, 0.9: 0.01, 1: 0.01},
 	},
 		[]string{
 			"IP",
@@ -120,7 +124,7 @@ var (
 		Subsystem:  "Summary",
 		Name:       "3",
 		Help:       "node3",
-		Objectives: map[float64]float64{0: 0.05, 0.5: 0.03, 1: 0.01},
+		Objectives: map[float64]float64{0: 0.05, 0.5: 0.03, 0.9: 0.01, 1: 0.01},
 	},
 		[]string{
 			"IP",
@@ -142,7 +146,7 @@ var (
 		Subsystem:  "Summary",
 		Name:       "4",
 		Help:       "node4",
-		Objectives: map[float64]float64{0: 0.05, 0.5: 0.03, 1: 0.01},
+		Objectives: map[float64]float64{0: 0.05, 0.5: 0.03, 0.9: 0.01, 1: 0.01},
 	},
 		[]string{
 			"IP",
@@ -164,7 +168,7 @@ var (
 		Subsystem:  "Summary",
 		Name:       "5",
 		Help:       "node5",
-		Objectives: map[float64]float64{0: 0.05, 0.5: 0.03, 1: 0.01},
+		Objectives: map[float64]float64{0: 0.05, 0.5: 0.03, 0.9: 0.01, 1: 0.01},
 	},
 		[]string{
 			"IP",
@@ -186,7 +190,7 @@ var (
 		Subsystem:  "Summary",
 		Name:       "6",
 		Help:       "node6",
-		Objectives: map[float64]float64{0: 0.05, 0.5: 0.03, 1: 0.01},
+		Objectives: map[float64]float64{0: 0.05, 0.5: 0.03, 0.9: 0.01, 1: 0.01},
 	},
 		[]string{
 			"IP",
@@ -208,7 +212,7 @@ var (
 		Subsystem:  "Summary",
 		Name:       "7",
 		Help:       "node7",
-		Objectives: map[float64]float64{0: 0.05, 0.5: 0.03, 1: 0.01},
+		Objectives: map[float64]float64{0: 0.05, 0.5: 0.03, 0.9: 0.01, 1: 0.01},
 	},
 		[]string{
 			"IP",
@@ -230,7 +234,7 @@ var (
 		Subsystem:  "Summary",
 		Name:       "8",
 		Help:       "node8",
-		Objectives: map[float64]float64{0: 0.05, 0.5: 0.03, 1: 0.01},
+		Objectives: map[float64]float64{0: 0.05, 0.5: 0.03, 0.9: 0.01, 1: 0.01},
 	},
 		[]string{
 			"IP",
@@ -252,7 +256,7 @@ var (
 		Subsystem:  "Summary",
 		Name:       "9",
 		Help:       "node9",
-		Objectives: map[float64]float64{0: 0.05, 0.5: 0.03, 1: 0.01},
+		Objectives: map[float64]float64{0: 0.05, 0.5: 0.03, 0.9: 0.01, 1: 0.01},
 	},
 		[]string{
 			"IP",
@@ -274,7 +278,7 @@ var (
 		Subsystem:  "Summary",
 		Name:       "10",
 		Help:       "node10",
-		Objectives: map[float64]float64{0: 0.05, 0.5: 0.03, 1: 0.01},
+		Objectives: map[float64]float64{0: 0.05, 0.5: 0.03, 0.9: 0.01, 1: 0.01},
 	},
 		[]string{
 			"IP",
@@ -296,7 +300,7 @@ var (
 		Subsystem:  "Summary",
 		Name:       "11",
 		Help:       "node11",
-		Objectives: map[float64]float64{0: 0.05, 0.5: 0.03, 1: 0.01},
+		Objectives: map[float64]float64{0: 0.05, 0.5: 0.03, 0.9: 0.01, 1: 0.01},
 	},
 		[]string{
 			"IP",
@@ -318,7 +322,7 @@ var (
 		Subsystem:  "Summary",
 		Name:       "13",
 		Help:       "node13",
-		Objectives: map[float64]float64{0: 0.05, 0.5: 0.03, 1: 0.01},
+		Objectives: map[float64]float64{0: 0.05, 0.5: 0.03, 0.9: 0.01, 1: 0.01},
 	},
 		[]string{
 			"IP",
@@ -340,7 +344,7 @@ var (
 		Subsystem:  "Summary",
 		Name:       "id14",
 		Help:       "node14",
-		Objectives: map[float64]float64{0: 0.05, 0.5: 0.03, 1: 0.01},
+		Objectives: map[float64]float64{0: 0.05, 0.5: 0.03, 0.9: 0.01, 1: 0.01},
 	},
 		[]string{
 			"IP",
@@ -362,7 +366,7 @@ var (
 		Subsystem:  "Summary",
 		Name:       "19",
 		Help:       "node19",
-		Objectives: map[float64]float64{0: 0.05, 0.5: 0.03, 1: 0.01},
+		Objectives: map[float64]float64{0: 0.05, 0.5: 0.03, 0.9: 0.01, 1: 0.01},
 	},
 		[]string{
 			"IP",
@@ -384,7 +388,7 @@ var (
 		Subsystem:  "Summary",
 		Name:       "20",
 		Help:       "node20",
-		Objectives: map[float64]float64{0: 0.05, 0.5: 0.03, 1: 0.01},
+		Objectives: map[float64]float64{0: 0.05, 0.5: 0.03, 0.9: 0.01, 1: 0.01},
 	},
 		[]string{
 			"IP",
@@ -406,7 +410,7 @@ var (
 		Subsystem:  "Summary",
 		Name:       "21",
 		Help:       "node21",
-		Objectives: map[float64]float64{0: 0.05, 0.5: 0.03, 1: 0.01},
+		Objectives: map[float64]float64{0: 0.05, 0.5: 0.03, 0.9: 0.01, 1: 0.01},
 	},
 		[]string{
 			"IP",
@@ -428,7 +432,7 @@ var (
 		Subsystem:  "Summary",
 		Name:       "23",
 		Help:       "node23",
-		Objectives: map[float64]float64{0: 0.05, 0.5: 0.03, 1: 0.01},
+		Objectives: map[float64]float64{0: 0.05, 0.5: 0.03, 0.9: 0.01, 1: 0.01},
 	},
 		[]string{
 			"IP",
@@ -561,10 +565,11 @@ func mongodbTogetpath(ip string, db string, table string) []string {
 	defer session.Close()
 
 	collection := session.DB(db).C(table)
-	var nowtime int64
-	nowtime = time.Now().UnixNano() / 1000000
+	var nowtime itime
+	err = collection.Find(bson.M{}).Sort("-insertTime").Limit(1).Select(bson.M{"insertTime": 1}).One(&nowtime)
+	//nowtime = time.Now().UnixNano() / 1000000
 	var min10time int64
-	min10time = nowtime - looptime*1000
+	min10time = nowtime.InsertTime - looptime*1000
 	var getpathresult []getpath
 
 	//通过sid获取getpath日志
@@ -578,6 +583,7 @@ func mongodbTogetpath(ip string, db string, table string) []string {
 			i++
 		}
 	}
+
 	var result2 []getpath = make([]getpath, i)
 	i = 0
 	for _, v := range getpathresult {
@@ -684,26 +690,30 @@ func main() {
 		Must() //注册prometheus
 		fmt.Println("Program startup ok...")
 		//获取getpath明码数据
-		getpathstring := mongodbTogetpath(ip, db, table)
-		for _, v := range getpathstring {
-			//获取延迟数据推送给prometheus
-			getpathToMap(v)
-		}
-		//是否推送数据给PushGatway
-		if globeCfg.Output.PushGateway {
-			if err := push.FromGatherer("relaydelay", push.HostnameGroupingKey(), globeCfg.Output.PushGatewayAddr, prometheus.DefaultGatherer); err != nil {
-				fmt.Println("FromGatherer:", err)
+		for {
+			getpathstring := mongodbTogetpath(ip, db, table)
+			for _, v := range getpathstring {
+				//获取延迟数据推送给prometheus
+				getpathToMap(v)
 			}
+			//是否推送数据给PushGatway
+			if globeCfg.Output.PushGateway {
+				if err := push.FromGatherer("relaydelay", push.HostnameGroupingKey(), globeCfg.Output.PushGatewayAddr, prometheus.DefaultGatherer); err != nil {
+					fmt.Println("FromGatherer:", err)
+				}
+			}
+			time.Sleep(time.Duration(globeCfg.Output.Period) * time.Second)
 		}
-		time.Sleep(time.Duration(globeCfg.Output.Period) * time.Second)
 	}()
 	//设置prometheus监听的ip和端口
 	if globeCfg.Output.Prometheus {
+
 		go func() {
-			http.Handle("/metrics", promhttp.Handler())
-			http.ListenAndServe(fmt.Sprintf("%s:%d", globeCfg.Gw.Addr, globeCfg.Gw.HttpListenPort), nil)
 			fmt.Println("ip", globeCfg.Gw.Addr)
 			fmt.Println("port", globeCfg.Gw.HttpListenPort)
+			http.Handle("/metrics", promhttp.Handler())
+			http.ListenAndServe(fmt.Sprintf("%s:%d", globeCfg.Gw.Addr, globeCfg.Gw.HttpListenPort), nil)
+
 		}()
 	}
 	c := make(chan os.Signal, 1)
