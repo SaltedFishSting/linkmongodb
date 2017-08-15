@@ -41,9 +41,9 @@ type RConfig struct {
 		Period          int    `yaml:"period"`
 	}
 	Relay struct {
-		Relaynode          []string `yaml:"relaynode"`
-		HistogramOptsparam string   `yaml:"histogramOptsparam"`
-		SummaryOptsparam   string   `yaml:"summaryOptsparam"`
+		Relaynode          map[int64]string    `yaml:"relaynode"`
+		HistogramOptsparam map[string]float64  `yaml:"histogramOptsparam"`
+		SummaryOptsparam   map[float64]float64 `yaml:"summaryOptsparam"`
 	}
 }
 
@@ -58,15 +58,18 @@ type itime struct {
 	InsertTime int64 `bson:"insertTime"`
 }
 
-//relay 节点数组
-//var relayid = []float64{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 13, 14, 19, 20, 21, 23}
-
+//relay 节点数组 map
 var relayidArray = list.New()
 var relayidMap = make(map[int64]string)
-var HistogramOptstart float64
-var HistogramOptwidth float64
-var HistogramOptcount int
+
+//HistogramOpt参数
+var HistogramOptsparamMap = make(map[string]float64)
+
+//SummaryOpt参数
 var SummaryOptsparamMap = make(map[float64]float64)
+
+//上一次的数据库的最后插入时间
+var lasttime int64 = 0
 
 //gzip解压
 func DoGzipUnCompress(compressSrc []byte) []byte {
@@ -112,10 +115,8 @@ func extract(ur map[int64]int64, ru map[int64]int64) error {
 
 func Observe(id int64, delay int64) {
 	strid := strconv.FormatInt(id, 10)
-	strdelay := strconv.FormatInt(delay, 10)
-	fdelay, _ := strconv.ParseFloat(strdelay, 10)
-	nodeh.WithLabelValues(strid, relayidMap[id]).Observe(fdelay)
-	nodes.WithLabelValues(strid, relayidMap[id]).Observe(fdelay)
+	nodeh.WithLabelValues(strid, relayidMap[id]).Observe(float64(delay))
+	nodes.WithLabelValues(strid, relayidMap[id]).Observe(float64(delay))
 
 }
 
@@ -131,45 +132,31 @@ func mongodbTogetpath(ip string, db string, table string) []string {
 	defer session.Close()
 
 	collection := session.DB(db).C(table)
+
 	var nowtime itime
 	err = collection.Find(bson.M{}).Sort("-insertTime").Limit(1).Select(bson.M{"insertTime": 1}).One(&nowtime)
 
 	var min10time int64
-	min10time = nowtime.InsertTime - looptime*1000
-
+	if lasttime == 0 {
+		min10time = nowtime.InsertTime - looptime*1000
+	} else {
+		min10time = lasttime
+	}
 	var getpathresult []getpath
 
 	//通过sid获取getpath日志
-	err = collection.Find(bson.M{"insertTime": bson.M{"$gt": min10time, "$lt": nowtime.InsertTime}}).Select(bson.M{"callGetpath": 1}).All(&getpathresult)
+	err = collection.Find(bson.M{"insertTime": bson.M{"$gt": min10time, "$lt": nowtime.InsertTime}, "callGetpath": bson.M{"$exists": true}}).Select(bson.M{"callGetpath": 1}).All(&getpathresult)
 	if err != nil {
 		panic(err)
 	}
-
-	i := 0
-	for _, v := range getpathresult {
-		if v.CallGetpath != "" {
-			i++
-		}
-	}
-
-	var result2 []getpath = make([]getpath, i)
-	i = 0
-	for _, v := range getpathresult {
-		if v.CallGetpath != "" {
-			result2[i] = v
-			i++
-		}
-	}
-
-	i = 0
 	// 存放未解码的getpsth
-	j := len(result2)
+	i := 0
+	j := len(getpathresult)
 	var getpathString []string = make([]string, j)
-	for _, result := range result2 {
+	for _, result := range getpathresult {
 		getpathString[i] = getpathToString(result)
 		i++
 	}
-
 	return getpathString
 }
 
@@ -260,38 +247,23 @@ func loadConfig() {
 }
 func init() {
 	loadConfig() //加载配置文件
-	relaynodes := globeCfg.Relay.Relaynode
-	fmt.Println(relaynodes)
-	for _, v := range relaynodes {
+	relayidMap = globeCfg.Relay.Relaynode
 
-		relaynode := strings.Split(v, ":")
-		i64, _ := strconv.ParseInt(relaynode[1], 10, 64)
-		relayidArray.PushBack(i64)
-		relayidMap[i64] = relaynode[0]
+	for k, _ := range relayidMap {
+
+		relayidArray.PushBack(k)
+
 	}
 
-	HistogramOptsparam := strings.Split(globeCfg.Relay.HistogramOptsparam, "|")
+	HistogramOptsparamMap = globeCfg.Relay.HistogramOptsparam
+	SummaryOptsparamMap = globeCfg.Relay.SummaryOptsparam
 
-	HistogramOptstart, _ = strconv.ParseFloat(HistogramOptsparam[0], 64)
-
-	HistogramOptwidth, _ = strconv.ParseFloat(HistogramOptsparam[1], 64)
-
-	HistogramOptcount, _ = strconv.Atoi(HistogramOptsparam[2])
-
-	SummaryOptsparam := strings.Split(globeCfg.Relay.SummaryOptsparam, "|")
-
-	for _, v := range SummaryOptsparam {
-		param := strings.Split(v, ":")
-		key, _ := strconv.ParseFloat(param[0], 64)
-		value, _ := strconv.ParseFloat(param[1], 64)
-		SummaryOptsparamMap[key] = value
-	}
 	nodeh = prometheus.NewHistogramVec(prometheus.HistogramOpts{
 		Namespace: "relaydelay",
 		Subsystem: "Histogram",
 		Name:      "relay",
 		Help:      "nodeh",
-		Buckets:   prometheus.LinearBuckets(HistogramOptstart, HistogramOptwidth, HistogramOptcount),
+		Buckets:   prometheus.LinearBuckets(HistogramOptsparamMap["start"], HistogramOptsparamMap["width"], int(HistogramOptsparamMap["count"])),
 	},
 		[]string{
 			"IP",
