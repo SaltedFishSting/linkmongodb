@@ -144,7 +144,7 @@ func mongodbTogetpath(ip string, db string, table string) []string {
 	}
 	var getpathresult []getpath
 
-	//通过sid获取getpath日志
+	//通过insertTime获取getpath日志
 	err = collection.Find(bson.M{"insertTime": bson.M{"$gt": min10time, "$lt": nowtime.InsertTime}, "callGetpath": bson.M{"$exists": true}}).Select(bson.M{"callGetpath": 1}).All(&getpathresult)
 	if err != nil {
 		panic(err)
@@ -266,8 +266,8 @@ func init() {
 		Buckets:   prometheus.LinearBuckets(HistogramOptsparamMap["start"], HistogramOptsparamMap["width"], int(HistogramOptsparamMap["count"])),
 	},
 		[]string{
-			"IP",
 			"RelayId",
+			"IP",
 		})
 
 	nodes = prometheus.NewSummaryVec(prometheus.SummaryOpts{
@@ -278,8 +278,8 @@ func init() {
 		Objectives: SummaryOptsparamMap,
 	},
 		[]string{
-			"IP",
 			"RelayId",
+			"IP",
 		})
 
 	prometheus.MustRegister(nodeh)
@@ -311,12 +311,13 @@ func main() {
 					fmt.Println("FromGatherer:", err)
 				}
 			}
+			fmt.Println(time.Now())
+
 			time.Sleep(time.Duration(globeCfg.Output.Period) * time.Second)
 		}
 	}()
 	//设置prometheus监听的ip和端口
 	if globeCfg.Output.Prometheus {
-
 		go func() {
 			fmt.Println("ip", globeCfg.Gw.Addr)
 			fmt.Println("port", globeCfg.Gw.HttpListenPort)
@@ -325,6 +326,7 @@ func main() {
 
 		}()
 	}
+
 	c := make(chan os.Signal, 1)
 	signal.Notify(c)
 	signal.Notify(c, os.Interrupt, os.Kill)
